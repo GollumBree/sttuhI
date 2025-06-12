@@ -13,9 +13,10 @@ screen = pygame.display.set_mode(
 )
 pygame.display.set_caption("Nudelholz")
 clock = pygame.time.Clock()
+font = pygame.font.SysFont(None, 36)
 
 # ser = serial.Serial("COM3")
-font = pygame.font.SysFont(None, 36)
+
 rotation = [0, 0, 0]
 p_racket = pygame.rect.Rect(30, 100, 20, 100)
 e_racket = pygame.rect.Rect(screen.get_width() - 50, 100, 20, 100)
@@ -69,6 +70,6 @@ while True:
     screen.blit(text, text_rect)
 
     pygame.display.flip()
-    clock.tick(1)
+    clock.tick(60)
 
 pygame.quit()
