@@ -23,6 +23,7 @@ font = pygame.font.SysFont(None, 36)
 
 rotation_matrix = np.eye(3)
 rotation_speed = (0, 0, 0)
+vx,vy,vz=0,0,0
 p_racket = pygame.rect.Rect(30, 100, 20, 100)
 e_racket = pygame.rect.Rect(screen.get_width() - 50, 100, 20, 100)
 
@@ -76,18 +77,20 @@ def draw_rectangle(x, y, width, height, color, rotation:float=0):
         x_offset = radius * math.cos(angle + rotation)
         points.append((x + x_offset, y + y_offset))
 
+    print(points)
+
     pygame.draw.polygon(screen, color, points)
 
 running = True
 while True:
     buttons = pygame.key.get_pressed()
     ax, ay, az, gx, gy, gz = (
-        buttons[pygame.K_UP] - buttons[pygame.K_DOWN],
-        buttons[pygame.K_SPACE] - buttons[pygame.K_LSHIFT],
-        buttons[pygame.K_RIGHT] - buttons[pygame.K_LEFT],
-        buttons[pygame.K_d] - buttons[pygame.K_a],
-        buttons[pygame.K_q] - buttons[pygame.K_e],
-        buttons[pygame.K_w] - buttons[pygame.K_s],
+        (buttons[pygame.K_UP] - buttons[pygame.K_DOWN]),
+        (buttons[pygame.K_SPACE] - buttons[pygame.K_LSHIFT]),
+        (buttons[pygame.K_RIGHT] - buttons[pygame.K_LEFT]),
+        (buttons[pygame.K_d] - buttons[pygame.K_a])/100,
+        (buttons[pygame.K_q] - buttons[pygame.K_e])/100,
+        (buttons[pygame.K_w] - buttons[pygame.K_s])/100,
     )
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -104,6 +107,8 @@ while True:
         rotation_speed[1] + gy / 180 * π,
         rotation_speed[2] + gz / 180 * π,
     )
+
+    vx,vy,vz=vx+ax,vy+ay,vz+az
     # Assume gx, gy, gz are angular velocities in degrees per frame
     # Create small rotation matrices for each axis
     Rx = np.array(
@@ -139,7 +144,7 @@ while True:
     # Assuming ax is forward/backward, ay is sidewards, az is up/down
     # Adjust according to your sensor orientation
 
-    movement = np.array([ax, ay, az]) @ rotation_matrix
+    movement = np.array([vx, vy, vz]) @ rotation_matrix
     p_racket.y = max(
         0, min(screen.get_height() - p_racket.height, p_racket.y + movement[2])
     )
@@ -150,7 +155,7 @@ while True:
     screen.fill(0)
     #pygame.draw.rect(screen, (255, 255, 255), p_racket)
     pygame.draw.rect(screen, (255, 255, 255), e_racket)
-    draw_rectangle(p_racket.x,p_racket.y,p_racket.width,p_racket.height,(0,0,0),matrix_to_euler(rotation_matrix)[1])
+    draw_rectangle(p_racket.x,p_racket.y,p_racket.width,p_racket.height,(255,255,255),matrix_to_euler(rotation_matrix)[1])
 
     text = font.render(
         f"Rotation: {', '.join(f'{x:.5}' for x in matrix_to_euler(rotation_matrix))}",
